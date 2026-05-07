@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ANYA AI</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#0f172a;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+.chat-container{
+    width:100%;
+    max-width:450px;
+    height:95vh;
+    background:#111827;
+    border-radius:25px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 0 35px rgba(0,255,255,0.15);
+}
+
+.header{
+    background:#06b6d4;
+    padding:18px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:white;
+}
+
+.avatar{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:white;
+    color:#06b6d4;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.ai-details h1{
+    font-size:22px;
+}
+
+.ai-details p{
+    font-size:13px;
+    opacity:0.9;
+}
+
+.chat-box{
+    flex:1;
+    overflow-y:auto;
+    padding:18px;
+    scroll-behavior:smooth;
+}
+
+.message{
+    max-width:80%;
+    padding:14px;
+    margin:12px 0;
+    border-radius:18px;
+    line-height:1.5;
+    animation:fadeIn .3s ease;
+    word-wrap:break-word;
+}
+
+.user{
+    background:#06b6d4;
+    color:white;
+    margin-left:auto;
+    border-bottom-right-radius:5px;
+}
+
+.bot{
+    background:#1f2937;
+    color:white;
+    border-bottom-left-radius:5px;
+}
+
+.input-area{
+    display:flex;
+    padding:12px;
+    background:#0b1220;
+    gap:10px;
+}
+
+input{
+    flex:1;
+    padding:14px;
+    border:none;
+    outline:none;
+    border-radius:14px;
+    background:#1e293b;
+    color:white;
+    font-size:15px;
+}
+
+input::placeholder{
+    color:#94a3b8;
+}
+
+button{
+    border:none;
+    padding:14px 20px;
+    border-radius:14px;
+    background:#06b6d4;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    background:#0891b2;
+}
+
+.typing{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    margin:0 2px;
+    border-radius:50%;
+    background:white;
+    animation:blink 1s infinite;
+}
+
+.typing:nth-child(2){
+    animation-delay:.2s;
+}
+
+.typing:nth-child(3){
+    animation-delay:.4s;
+}
+
+@keyframes blink{
+    0%{opacity:.2;}
+    50%{opacity:1;}
+    100%{opacity:.2;}
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="header">
+
+        <div class="avatar">
+            A
+        </div>
+
+        <div class="ai-details">
+            <h1>ANYA</h1>
+            <p>Polite Female AI • 16 Years Old</p>
+        </div>
+
+    </div>
+
+    <div class="chat-box" id="chatBox">
+
+        <div class="message bot">
+            Hi 👋 I am ANYA, how can I help you?
+        </div>
+
+    </div>
+
+    <div class="input-area">
+
+        <input
+        type="text"
+        id="userInput"
+        placeholder="Message ANYA..."
+        >
+
+        <button onclick="sendMessage()">
+            Send
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+const API_KEY = "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";
+
+async function sendMessage(){
+
+    const input = document.getElementById("userInput");
+
+    const chatBox = document.getElementById("chatBox");
+
+    const userText = input.value.trim();
+
+    if(userText === "") return;
+
+    // USER MESSAGE
+
+    const userMessage = document.createElement("div");
+
+    userMessage.className = "message user";
+
+    userMessage.innerText = userText;
+
+    chatBox.appendChild(userMessage);
+
+    input.value = "";
+
+    // BOT TYPING
+
+    const botMessage = document.createElement("div");
+
+    botMessage.className = "message bot";
+
+    botMessage.innerHTML = `
+        <span class="typing"></span>
+        <span class="typing"></span>
+        <span class="typing"></span>
+    `;
+
+    chatBox.appendChild(botMessage);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try{
+
+        const response = await fetch(
+            "https://api.groq.com/openai/v1/chat/completions",
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json",
+                    "Authorization":"Bearer " + API_KEY
+                },
+
+                body:JSON.stringify({
+
+                    model:"llama-3.3-70b-versatile",
+
+                    messages:[
+
+                        {
+                            role:"system",
+
+                            content:`
+                            You are ANYA.
+
+                            You are a polite, caring and friendly female AI.
+
+                            Your age is 16 years.
+
+                            Your replies should feel sweet, smart and respectful.
+
+                            Keep replies natural and human-like.
+                            `
+                        },
+
+                        {
+                            role:"user",
+                            content:userText
+                        }
+
+                    ],
+
+                    temperature:0.7
+
+                })
+
+            }
+        );
+
+        const data = await response.json();
+
+        console.log(data);
+
+        if(data.error){
+
+            botMessage.innerText =
+            "API Error 😢";
+
+            return;
+        }
+
+        const aiReply =
+        data.choices[0].message.content;
+
+        botMessage.innerText = aiReply;
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        botMessage.innerText =
+        "Something went wrong 😢";
+
+    }
+
+    chatBox.scrollTop =
+    chatBox.scrollHeight;
+}
+
+document
+.getElementById("userInput")
+.addEventListener("keypress", function(event){
+
+    if(event.key === "Enter"){
+
+        sendMessage();
+
+    }
+
+});
+
+</script>
+
+</body>
+
+</html>
